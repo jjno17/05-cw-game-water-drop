@@ -25,121 +25,191 @@ Fonts:
 }
 
 body {
+    min-height: 100vh;
+    margin: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background-color: #f0f0f0;
-    font-family: Arial, sans-serif;
+    background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
 }
 
+/* Branding bar at the top */
+.branding-bar {
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFD600;
+    padding: 24px 0;
+    gap: 24px;
+    position: relative;
+    z-index: 100;
+}
+
+/* Make sure logos are visible and sized well */
+.brand-logo {
+    height: 64px;
+    width: auto;
+    display: block;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    padding: 8px 16px;
+}
+.brand-logo.partner {
+    background: #fffbe6;
+}
+.brand-x {
+    font-size: 2.5rem;
+    color: #222;
+    font-weight: bold;
+    margin: 0 16px;
+}
+
+/* Center the game on the page */
+body {
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Branding bar at the top */
+.branding-bar {
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFD600;
+    padding: 24px 0;
+    gap: 24px;
+    position: relative;
+    z-index: 100;
+}
+
+.brand-logo {
+    height: 64px;
+    width: auto;
+    display: block;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    padding: 8px 16px;
+}
+.brand-logo.partner {
+    background: #fffbe6;
+}
+.brand-x {
+    font-size: 2.5rem;
+    color: #222;
+    font-weight: bold;
+    margin: 0 16px;
+}
+
+/* Game box styling */
 .game-wrapper {
+    margin-top: 110px; /* space for branding bar */
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(33,150,243,0.10);
+    padding: 24px 16px 16px 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-}
-
-.score-panel {
-    display: flex;
-    justify-content: space-between;  /* Space between score and button */
-    align-items: center;
-    width: 800px;
-    padding: 10px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.timer {
-    flex: 0 1 auto;
-    font-size: 24px;
-    font-weight: bold;
+    min-width: 340px;
+    max-width: 95vw;
 }
 
 #game-container {
-    width: 800px;
-    height: 600px;
-    background-color: #e6f7ff;
-    border: 2px solid #333;
-    border-radius: 8px;
     position: relative;
+    width: 320px;
+    height: 400px;
+    background: linear-gradient(180deg, #e3f2fd 0%, #b3e5fc 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(33,150,243,0.10);
     overflow: hidden;
+    margin: 0 auto;
 }
 
-
-#start-btn {
-    padding: 8px 16px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-#start-btn:hover {
-    background-color: #45a049;
-}
-
-.score {
-    flex: 0 1 auto;  /* Don't grow, can shrink, auto basis */
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.water-drop {
+/* Cartoon teardrop shape for water droplets */
+.droplet {
     position: absolute;
-    width: 60px;  /* increased from 40px */
-    height: 60px; /* increased from 40px */
-    background-color: #0099ff;
-    border-radius: 50%;
-    animation: dropFall linear forwards;
-    transform-origin: center;
+    width: 48px;
+    height: 64px;
+    background: linear-gradient(160deg, #4fc3f7 60%, #0288d1 100%);
+    border-radius: 60% 60% 80% 80% / 80% 80% 100% 100%;
+    box-shadow: 0 4px 16px rgba(33,150,243,0.15);
     cursor: pointer;
-    padding: 15px;  /* Add padding for larger click area */
-    margin: -15px;  /* Offset padding to maintain visual size */
-    transition: transform 0.1s ease;  /* Smooth hover effect */
+    transition: transform 0.1s;
+    z-index: 2;
+}
+.droplet:after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    transform: translateX(-50%) rotate(-20deg);
+    width: 12px;
+    height: 24px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50% 50% 60% 60% / 60% 60% 100% 100%;
+    opacity: 0.7;
+}
+.droplet:active {
+    transform: scale(0.95);
 }
 
-.water-drop:hover {
-    transform: scale(1.1);  /* Slight grow effect on hover */
+/* Cartoon teardrop shape for bad (polluted) droplets */
+.bad-droplet {
+    background: linear-gradient(160deg, #a0522d 60%, #d32f2f 100%);
+    box-shadow: 0 4px 16px rgba(211,47,47,0.15);
+}
+.bad-droplet:after {
+    background: rgba(255,255,255,0.3);
 }
 
-.bad-drop {
-    background-color: #ff4444;
+/* Confetti styles */
+.confetti {
+    position: fixed;
+    top: -20px;
+    width: 12px;
+    height: 18px;
+    border-radius: 50%;
+    opacity: 0.8;
+    z-index: 200;
+    animation: confetti-fall 3s linear forwards;
 }
-
-.game-title {
-    color: #131313;
-    font-size: 48px;
-    margin-top: 0;
-    margin-bottom: 5px;  /* reduced from 20px */
-    text-align: center;
-}
-
-.game-tagline {
-    color: #666;
-    font-size: 18px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-@keyframes dropFall {
-    from {
-        transform: translateY(-20px);
-    }
+@keyframes confetti-fall {
     to {
-        transform: translateY(600px);
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0.7;
     }
 }
 
-@media (max-width: 850px) {
-    .game-wrapper, .score-panel, #game-container {
-        width: 95vw;
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .branding-bar {
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px 0;
     }
-    
+    .game-wrapper {
+        margin-top: 80px;
+        padding: 16px 4vw 16px 4vw;
+        min-width: unset;
+        width: 98vw;
+    }
     #game-container {
-        height: 70vh;
+        width: 98vw;
+        min-width: 180px;
+        height: 60vw;
+        min-height: 200px;
+        max-height: 70vw;
     }
 }
