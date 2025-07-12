@@ -32,7 +32,8 @@ body {
     justify-content: center;
     align-items: center;
     background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Lato', Arial, sans-serif; /* Use Lato as a close alternative to Proxima Nova */
+    color: #333;
 }
 
 /* Branding bar at the top */
@@ -77,7 +78,8 @@ body {
     justify-content: center;
     align-items: center;
     background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Lato', Arial, sans-serif;
+    color: #333;
 }
 
 /* Branding bar at the top */
@@ -137,49 +139,42 @@ body {
     margin: 0 auto;
 }
 
-/* Cartoon teardrop shape for water droplets */
+/* Base droplet styling */
 .droplet {
+    width: 40px; /* Adjust size as needed */
+    height: 60px;
+    background: radial-gradient(circle at 30% 30%, #00bfff, #1e90ff); /* Gradient for a water-like effect */
+    border-radius: 50% 50% 60% 60%; /* Create a droplet shape */
     position: absolute;
-    width: 48px;
-    height: 64px;
-    background: linear-gradient(160deg, #4fc3f7 60%, #0288d1 100%);
-    border-radius: 60% 60% 80% 80% / 80% 80% 100% 100%;
-    box-shadow: 0 4px 16px rgba(33,150,243,0.15);
-    cursor: pointer;
-    transition: transform 0.1s;
-    z-index: 2;
-}
-.droplet:after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 8px;
-    transform: translateX(-50%) rotate(-20deg);
-    width: 12px;
-    height: 24px;
-    background: rgba(255,255,255,0.5);
-    border-radius: 50% 50% 60% 60% / 60% 60% 100% 100%;
-    opacity: 0.7;
-}
-.droplet:active {
-    transform: scale(0.95);
+    top: -60px; /* Start above the game container */
+    animation: fall 3s linear forwards; /* Falling animation */
+    box-shadow: 0 4px 8px rgba(0, 0, 255, 0.3); /* Add a soft shadow for depth */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Add a light border for a glossy effect */
 }
 
-/* Cartoon teardrop shape for bad (polluted) droplets */
-.bad-droplet {
-    background: linear-gradient(160deg, #a0522d 60%, #d32f2f 100%);
-    box-shadow: 0 4px 16px rgba(211,47,47,0.15);
+/* Red droplet styling */
+.droplet.red {
+    background: radial-gradient(circle at 30% 30%, #ff6347, #ff4500); /* Gradient for a red droplet */
+    box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3); /* Red shadow */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Light border for gloss */
 }
-.bad-droplet:after {
-    background: rgba(255,255,255,0.3);
+
+/* Falling animation */
+@keyframes fall {
+    0% {
+        top: -60px; /* Start above the game container */
+    }
+    100% {
+        top: 100%; /* End at the bottom of the game container */
+    }
 }
 
 /* Confetti styles */
 .confetti {
     position: fixed;
     top: -20px;
-    width: 12px;
-    height: 18px;
+    width: 10px;
+    height: 15px;
     border-radius: 50%;
     opacity: 0.8;
     z-index: 200;
@@ -189,6 +184,178 @@ body {
     to {
         transform: translateY(100vh) rotate(360deg);
         opacity: 0.7;
+    }
+}
+
+/* Water drop styles */
+.water-drop {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(160deg, #4fc3f7 60%, #0288d1 100%);
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 255, 0.2);
+    animation: fall 3s linear infinite;
+}
+
+.water-drop:after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 5px;
+    transform: translateX(-50%) rotate(-20deg);
+    width: 8px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50% 50% 60% 60% / 60% 60% 100% 100%;
+    opacity: 0.7;
+}
+
+.bad-droplet {
+    background: linear-gradient(160deg, #F5402C 60%, #D32F2F 100%);
+    box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3);
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(400px); /* Adjust based on game container height */
+    }
+}
+
+/* Footer styles */
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333;
+}
+
+.footer a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* Ensure audio elements are hidden from view */
+audio {
+    display: none;
+}
+
+/* Game Over window styles */
+.game-over-window {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    padding: 24px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.game-over-window h2 {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.game-over-window button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #2E9DF7;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.game-over-window button:hover {
+    background-color: #1c7dc9;
+}
+
+/* Congratulations window styles */
+.congratulations-window {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    padding: 24px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.congratulations-window h2 {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.congratulations-window p {
+    font-size: 1rem;
+    margin-bottom: 24px;
+    color: #666;
+}
+
+.congratulations-window button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.congratulations-window button:hover {
+    background-color: #388E3C;
+}
+
+/* Milestone popup styles */
+.milestone-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    text-align: center;
+    z-index: 1000;
+    animation: fade-in-out 2s ease-in-out;
+}
+
+@keyframes fade-in-out {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
     }
 }
 

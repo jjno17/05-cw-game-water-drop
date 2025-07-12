@@ -5,6 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Water Drop Game</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Milestone popup styling */
+        .milestone-popup {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            z-index: 1000;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="branding-bar" style="justify-content: center;">
@@ -18,13 +44,74 @@
             <div class="timer">Time: <span id="time">30</span>s</div>
             <button id="start-btn">Start Game</button>
             <button id="reset-btn">Reset</button>
+            <label for="difficulty">Difficulty:</label>
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard</option>
+            </select>
         </div>
         
         <div id="confetti-container"></div>
         <div id="game-container">
         </div>
     </div>
+
+    <audio id="collect-sound" src="audio/collect.mp3"></audio>
+    <audio id="miss-sound" src="audio/miss.mp3"></audio>
+    <audio id="button-sound" src="audio/button.mp3"></audio>
+    <audio id="win-sound" src="audio/win.mp3"></audio>
+
+    <footer class="footer">
+        <p>Support <a href="https://www.charitywater.org" target="_blank">charity: water</a> and make a difference! 
+        <a href="https://www.charitywater.org/donate" target="_blank">Donate here</a>.</p>
+    </footer>
     
+    <!-- Link to external JavaScript file -->
     <script src="script.js"></script>
+    <script>
+        let score = 0; // Declare score globally
+
+        const milestoneMessages = [
+            { score: 10, message: "Great job! You've hit 10 droplets!" }
+        ];
+
+        const milestonesTriggered = new Set();
+
+        function showMilestoneMessage(message) {
+            const milestonePopup = document.createElement('div');
+            milestonePopup.classList.add('milestone-popup');
+            milestonePopup.textContent = message;
+
+            document.body.appendChild(milestonePopup);
+
+            // Remove the popup after 2 seconds
+            setTimeout(() => milestonePopup.remove(), 2000);
+        }
+
+        function checkMilestones(score) {
+            console.log("Checking milestones for score:", score); // Debugging log
+            milestoneMessages.forEach(milestone => {
+                if (score >= milestone.score && !milestonesTriggered.has(milestone.score)) {
+                    console.log("Milestone reached:", milestone.message); // Debugging log
+                    showMilestoneMessage(milestone.message); // Display milestone message
+                    milestonesTriggered.add(milestone.score); // Mark milestone as triggered
+                }
+            });
+        }
+
+        droplet.addEventListener('click', () => {
+            if (droplet.dataset.type === 'good') {
+                score += 1; // Add a point for blue droplets
+                collectSound.play(); // Play collect sound
+            } else {
+                score = Math.max(0, score - 1); // Deduct a point for red droplets
+                missSound.play(); // Play miss sound
+            }
+            scoreElement.textContent = score; // Update the score display
+            checkMilestones(score); // Check for milestones
+            droplet.remove(); // Remove the droplet after it's clicked
+        });
+    </script>
 </body>
 </html>

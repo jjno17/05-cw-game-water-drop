@@ -1,173 +1,250 @@
 // Variables to control game state
-let gameRunning = false; // Keeps track of whether game is active or not
-let dropMaker; // Will store our timer that creates drops regularly
+let gameRunning = false;
 let score = 0;
-const scoreElement = document.getElementById('score');
-const gameContainer = document.getElementById('game-container');
-const timeElement = document.getElementById('time');
 let timeLeft = 30;
-let timerInterval;
-let gameInterval;
-let gameActive = false;
+let gameInterval, timerInterval;
+const scoreElement = document.getElementById('score');
+const timeElement = document.getElementById('time');
+const gameContainer = document.getElementById('game-container');
+const difficultySelect = document.getElementById('difficulty');
 
-// Wait for button click to start the game
-document.getElementById("start-btn").addEventListener("click", startGame);
-document.getElementById("reset-btn").addEventListener("click", resetGame);
+// Difficulty settings
+const difficultySettings = {
+    easy: { time: 60, spawnRate: 1000 },
+    normal: { time: 30, spawnRate: 700 },
+    hard: { time: 15, spawnRate: 500 }
+};
+let currentDifficulty = 'normal';
+
+// Event listeners
+document.getElementById('start-btn').addEventListener('click', startGame);
+document.getElementById('reset-btn').addEventListener('click', resetGame);
+difficultySelect.addEventListener('change', () => {
+    currentDifficulty = difficultySelect.value;
+    resetGame();
+});
+
+// Sounds
+const collectSound = document.getElementById('collect-sound');
+const missSound = document.getElementById('miss-sound');
+const buttonSound = document.getElementById('button-sound');
+const winSound = document.getElementById('win-sound');
 
 function startGame() {
-  // Prevent multiple games from running at once
-  if (gameRunning) return;
+    if (gameRunning) return;
+    console.log('Game started'); // Debugging log
+    gameRunning = true;
+    const settings = difficultySettings[currentDifficulty];
+    score = 0;
+    timeLeft = settings.time;
+    scoreElement.textContent = score;
+    timeElement.textContent = timeLeft;
+    gameContainer.innerHTML = ''; // Clear existing droplets
 
-  gameRunning = true;
-  score = 0;
-  scoreElement.textContent = score;
-  gameContainer.innerHTML = '';
-  clearInterval(gameInterval);
-  clearInterval(timerInterval);
-  timeLeft = 30;
-  timeElement.textContent = timeLeft;
-  gameActive = true;
-  gameInterval = setInterval(spawnDroplet, 700);
-  timerInterval = setInterval(() => {
-      timeLeft--;
-      timeElement.textContent = timeLeft;
-      if (timeLeft <= 0) {
-          endGame();
-      }
-  }, 1000);
+    // Start spawning droplets
+    gameInterval = setInterval(spawnDroplet, settings.spawnRate);
+    console.log('Droplet spawning started'); // Debugging log
+
+    // Start the timer
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        timeElement.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            endGame();
+        }
+    }, 1000);
+    console.log('Timer started'); // Debugging log
 }
 
 function resetGame() {
-  clearInterval(gameInterval);
-  clearInterval(timerInterval);
-  gameRunning = false;
-  gameActive = false;
-  score = 0;
-  scoreElement.textContent = score;
-  timeLeft = 30;
-  timeElement.textContent = timeLeft;
-  gameContainer.innerHTML = '';
+    clearInterval(gameInterval);
+    clearInterval(timerInterval);
+    gameRunning = false;
+    const settings = difficultySettings[currentDifficulty];
+    score = 0;
+    timeLeft = settings.time;
+    scoreElement.textContent = score;
+    timeElement.textContent = timeLeft;
+    gameContainer.innerHTML = ''; // Clear droplets
 }
 
-function createDrop() {
-  // Create a new div element that will be our water drop
-  const drop = document.createElement("div");
-  drop.className = "water-drop";
+function spawnDroplet() {
+    const droplet = document.createElement('div');
+    droplet.classList.add('droplet');
 
-  // Make drops different sizes for visual variety
-  const initialSize = 60;
-  const sizeMultiplier = Math.random() * 0.8 + 0.5;
-  const size = initialSize * sizeMultiplier;
-  drop.style.width = drop.style.height = `${size}px`;
+    // Randomly decide if it's a good (blue) or bad (red) droplet
+    if (Math.random() > 0.5) {
+        droplet.classList.add('red'); // Bad droplet
+        droplet.dataset.type = 'bad';
+    } else {
+        droplet.dataset.type = 'good'; // Good droplet
+    }
 
-  // Position the drop randomly across the game width
-  // Subtract 60 pixels to keep drops fully inside the container
-  const gameWidth = document.getElementById("game-container").offsetWidth;
-  const xPosition = Math.random() * (gameWidth - 60);
-  drop.style.left = xPosition + "px";
+    // Set random horizontal position
+    droplet.style.left = Math.random() * 90 + '%';
 
-  // Make drops fall for 4 seconds
-  drop.style.animationDuration = "4s";
+    // Add click event to handle scoring
+    droplet.addEventListener('click', () => {
+        if (droplet.dataset.type === 'good') {
+            score += 1; // Add a point for blue droplets
+            collectSound.play(); // Play collect sound
+        } else {
+            score = Math.max(0, score - 1); // Deduct a point for red droplets, but don't go below 0
+            missSound.play(); // Play miss sound
+        }
+        scoreElement.textContent = score; // Update the score display
+        droplet.remove(); // Remove the droplet after it's clicked
+    });
 
-  // Add the new drop to the game screen
-  document.getElementById("game-container").appendChild(drop);
+    // Append to the game container
+    gameContainer.appendChild(droplet);
 
-  // Remove drops that reach the bottom (weren't clicked)
-  drop.addEventListener("animationend", () => {
-    drop.remove(); // Clean up drops that weren't caught
-  });
+    // Remove droplet after it falls out of view
+    droplet.addEventListener('animationend', () => {
+        if (gameContainer.contains(droplet)) {
+            gameContainer.removeChild(droplet);
+        }
+    });
 }
 
-function createDroplet(x, y, id, isBad = false) {
+function createDroplet(x, isBad) {
     const droplet = document.createElement('div');
     droplet.className = isBad ? 'droplet bad-droplet' : 'droplet';
-    droplet.style.left = x + 'px';
-    droplet.style.top = y + 'px';
-    droplet.dataset.id = id;
-    droplet.addEventListener('click', function(e) {
+    droplet.style.left = `${x}px`;
+    droplet.style.top = `0px`;
+
+    droplet.addEventListener('click', () => {
         if (isBad) {
-            score = Math.max(0, score - 1);
+            score = Math.max(0, score - 1); // Deduct points for bad droplets
+            missSound.play();
         } else {
-            score += 1;
+            score += 1; // Add points for good droplets
+            collectSound.play();
         }
         scoreElement.textContent = score;
         droplet.remove();
-        e.stopPropagation();
     });
-    return droplet;
-}
 
-let dropletId = 0;
-function spawnDroplet() {
-    const x = Math.random() * (gameContainer.offsetWidth - 30);
-    const y = 0;
-    const isBad = Math.random() < 0.25; // 25% chance to spawn a bad droplet
-    const droplet = createDroplet(x, y, dropletId++, isBad);
-    gameContainer.appendChild(droplet);
-    animateDroplet(droplet);
+    return droplet;
 }
 
 function animateDroplet(droplet) {
     let y = 0;
-    const fallSpeed = 2 + Math.random() * 3;
+    const fallSpeed = 2 + Math.random() * 3; // Randomize fall speed
     function fall() {
         y += fallSpeed;
-        droplet.style.top = y + 'px';
+        droplet.style.top = `${y}px`;
         if (y < gameContainer.offsetHeight - 30 && gameContainer.contains(droplet)) {
             requestAnimationFrame(fall);
         } else if (gameContainer.contains(droplet)) {
-            droplet.remove();
+            droplet.remove(); // Remove droplet if it reaches the bottom
         }
     }
     fall();
 }
 
-const winningMessages = [
-    "Amazing! You're a water drop master!",
-    "Fantastic job! You win!",
-    "Incredible! You caught so many drops!",
-    "Winner! You have great reflexes!"
-];
 const losingMessages = [
-    "Try again! You can do better!",
     "Don't give up! Catch more drops next time!",
     "Almost there! Give it another shot!",
     "Keep practicing! You'll win soon!"
 ];
 
-function launchConfetti() {
-    const confettiContainer = document.getElementById('confetti-container');
-    confettiContainer.innerHTML = '';
-    const colors = ['#FFD600', '#4fc3f7', '#0288d1', '#fff176', '#81d4fa'];
-    for (let i = 0; i < 80; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.animationDelay = (Math.random() * 2) + 's';
-        confettiContainer.appendChild(confetti);
-    }
-    setTimeout(() => confettiContainer.innerHTML = '', 3500);
+const milestoneMessages = [
+    { score: 10, message: "Halfway there! Keep going!" }, // Halfway to 20
+    { score: 20, message: "Great job! You reached 20 points!" },
+    { score: 30, message: "You're on fire! Keep it up!" },
+    { score: 50, message: "Amazing! You're unstoppable!" }
+];
+
+let milestonesTriggered = new Set();
+
+function checkMilestones(score) {
+    milestoneMessages.forEach(milestone => {
+        if (score >= milestone.score && !milestonesTriggered.has(milestone.score)) {
+            showMilestoneMessage(milestone.message); // Display milestone message
+            milestonesTriggered.add(milestone.score); // Mark milestone as triggered
+        }
+    });
 }
 
-function showEndMessage(isWin) {
-    const messageArr = isWin ? winningMessages : losingMessages;
-    const message = messageArr[Math.floor(Math.random() * messageArr.length)];
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'end-message';
-    msgDiv.textContent = message + ` (Score: ${score})`;
-    gameContainer.innerHTML = '';
-    gameContainer.appendChild(msgDiv);
-    if (isWin) launchConfetti();
+function showMilestoneMessage(message) {
+    const milestonePopup = document.createElement('div');
+    milestonePopup.classList.add('milestone-popup');
+    milestonePopup.textContent = message;
+
+    document.body.appendChild(milestonePopup);
+
+    // Remove the popup after 2 seconds
+    setTimeout(() => milestonePopup.remove(), 2000);
+}
+
+function updateScore(points) {
+    score += points;
+    if (score < 0) score = 0; // Ensure score doesn't go below 0
+    scoreElement.textContent = score;
+
+    // Check for milestone messages
+    checkMilestones(score);
+
+    // Check if the player has reached 20+ droplets
+    if (score >= 20 && gameRunning) {
+        gameRunning = false; // Stop further game actions
+        winSound.play(); // Play win sound
+        showConfetti(); // Trigger confetti
+        showGameOverWindow('Congratulations! You collected 20+ droplets!'); // Show win popup
+    }
 }
 
 function endGame() {
+    gameRunning = false;
     clearInterval(gameInterval);
     clearInterval(timerInterval);
-    gameActive = false;
-    const isWin = score >= 20;
-    showEndMessage(isWin);
-    if (isWin) {
-        launchConfetti();
+
+    if (score >= 20) {
+        winSound.play(); // Play win sound
+        showConfetti(); // Trigger confetti
+        showGameOverWindow('Congratulations! You collected 20+ droplets!');
+    } else {
+        const randomLosingMessage = losingMessages[Math.floor(Math.random() * losingMessages.length)];
+        showGameOverWindow(`Game Over! ${randomLosingMessage}`);
     }
+}
+
+function showConfetti() {
+    const confettiContainer = document.getElementById('confetti-container');
+    confettiContainer.innerHTML = ''; // Clear any existing confetti
+    for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.backgroundColor = getRandomConfettiColor();
+        confetti.style.animationDelay = `${Math.random() * 2}s`;
+        confettiContainer.appendChild(confetti);
+
+        // Remove confetti after animation ends
+        setTimeout(() => confetti.remove(), 3000);
+    }
+}
+
+function getRandomConfettiColor() {
+    const colors = ['#FFC907', '#2E9DF7', '#8BD1CB', '#4FCB53', '#FF902A', '#F5402C', '#159A48', '#F16061'];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function showGameOverWindow(message) {
+    const gameWrapper = document.querySelector('.game-wrapper');
+    const gameOverWindow = document.createElement('div');
+    gameOverWindow.classList.add('game-over-window');
+    gameOverWindow.innerHTML = `
+        <h2>${message}</h2>
+        <button id="play-again-btn">Play Again</button>
+    `;
+    gameWrapper.appendChild(gameOverWindow);
+
+    document.getElementById('play-again-btn').addEventListener('click', () => {
+        gameOverWindow.remove();
+        resetGame();
+    });
 }
